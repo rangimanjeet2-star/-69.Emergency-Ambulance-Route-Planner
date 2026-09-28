@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergency Ambulance Route Planner</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header class="header">
+    <div>
+        <h1>🚑 Emergency Ambulance Route Planner</h1>
+        <p>Find the fastest emergency route using Dijkstra's Shortest Path Algorithm</p>
+    </div>
+</header>
+
+<main class="container">
+
+    <section class="control-panel">
+
+        <div class="control-box">
+            <label>🚑 Ambulance Start</label>
+            <select id="startNode">
+                <option value="A">A - Emergency Station</option>
+                <option value="B">B - Main Road</option>
+                <option value="C">C - City Center</option>
+                <option value="D">D - Market</option>
+                <option value="E">E - School</option>
+                <option value="F">F - Hospital</option>
+                <option value="G">G - Highway</option>
+                <option value="H">H - Junction</option>
+            </select>
+        </div>
+
+        <div class="arrow">➡️</div>
+
+        <div class="control-box">
+            <label>🏥 Hospital Destination</label>
+            <select id="endNode">
+                <option value="F">F - Hospital</option>
+                <option value="C">C - City Center</option>
+                <option value="D">D - Market</option>
+                <option value="E">E - School</option>
+                <option value="G">G - Highway</option>
+                <option value="H">H - Junction</option>
+                <option value="A">A - Emergency Station</option>
+                <option value="B">B - Main Road</option>
+            </select>
+        </div>
+
+        <button id="findRoute">🚨 Find Fastest Route</button>
+        <button id="resetBtn" class="reset">↻ Reset</button>
+
+    </section>
+
+    <section class="dashboard">
+
+        <div class="info-card">
+            <span>🚑</span>
+            <div>
+                <small>Ambulance</small>
+                <strong id="startDisplay">A</strong>
+            </div>
+        </div>
+
+        <div class="info-card">
+            <span>🏥</span>
+            <div>
+                <small>Hospital</small>
+                <strong id="endDisplay">F</strong>
+            </div>
+        </div>
+
+        <div class="info-card">
+            <span>📍</span>
+            <div>
+                <small>Route Cost</small>
+                <strong id="distance">--</strong>
+            </div>
+        </div>
+
+        <div class="info-card">
+            <span>⏱️</span>
+            <div>
+                <small>Estimated Time</small>
+                <strong id="time">--</strong>
+            </div>
+        </div>
+
+    </section>
+
+    <section class="map-section">
+
+        <div class="map-header">
+            <div>
+                <h2>🗺️ City Emergency Road Network</h2>
+                <p>Select an ambulance station and hospital, then find the fastest route.</p>
+            </div>
+
+            <div class="legend">
+                <span><i class="start-dot"></i> Ambulance</span>
+                <span><i class="hospital-dot"></i> Hospital</span>
+                <span><i class="route-dot"></i> Fastest Route</span>
+            </div>
+        </div>
+
+        <div id="map" class="map">
+
+            <!-- Roads -->
+            <svg class="roads" viewBox="0 0 900 500">
+
+                <line id="road-A-B" x1="100" y1="100" x2="300" y2="100"/>
+                <line id="road-A-D" x1="100" y1="100" x2="180" y2="300"/>
+                <line id="road-B-C" x1="300" y1="100" x2="500" y2="100"/>
+                <line id="road-B-E" x1="300" y1="100" x2="400" y2="300"/>
+                <line id="road-C-F" x1="500" y1="100" x2="700" y2="180"/>
+                <line id="road-C-G" x1="500" y1="100" x2="600" y2="350"/>
+                <line id="road-D-E" x1="180" y1="300" x2="400" y2="300"/>
+                <line id="road-D-H" x1="180" y1="300" x2="300" y2="430"/>
+                <line id="road-E-F" x1="400" y1="300" x2="700" y2="180"/>
+                <line id="road-E-G" x1="400" y1="300" x2="600" y2="350"/>
+                <line id="road-F-G" x1="700" y1="180" x2="600" y2="350"/>
+                <line id="road-G-H" x1="600" y1="350" x2="300" y2="430"/>
+                <line id="road-E-H" x1="400" y1="300" x2="300" y2="430"/>
+
+            </svg>
+
+            <!-- Road labels -->
+            <span class="weight w1">4</span>
+            <span class="weight w2">3</span>
+            <span class="weight w3">5</span>
+            <span class="weight w4">6</span>
+            <span class="weight w5">7</span>
+            <span class="weight w6">4</span>
+            <span class="weight w7">2</span>
+            <span class="weight w8">8</span>
+            <span class="weight w9">3</span>
+            <span class="weight w10">5</span>
+            <span class="weight w11">2</span>
+            <span class="weight w12">6</span>
+            <span class="weight w13">4</span>
+
+            <!-- Nodes -->
+
+            <div class="node" id="node-A" style="left:100px;top:100px;">
+                <span>A</span>
+                <small>Station</small>
+            </div>
+
+            <div class="node" id="node-B" style="left:300px;top:100px;">
+                <span>B</span>
+                <small>Main Road</small>
+            </div>
+
+            <div class="node" id="node-C" style="left:500px;top:100px;">
+                <span>C</span>
+                <small>City Center</small>
+            </div>
+
+            <div class="node hospital" id="node-F" style="left:700px;top:180px;">
+                <span>F</span>
+                <small>Hospital</small>
+            </div>
+
+            <div class="node" id="node-D" style="left:180px;top:300px;">
+                <span>D</span>
+                <small>Market</small>
+            </div>
+
+            <div class="node" id="node-E" style="left:400px;top:300px;">
+                <span>E</span>
+                <small>School</small>
+            </div>
+
+            <div class="node" id="node-G" style="left:600px;top:350px;">
+                <span>G</span>
+                <small>Highway</small>
+            </div>
+
+            <div class="node" id="node-H" style="left:300px;top:430px;">
+                <span>H</span>
+                <small>Junction</small>
+            </div>
+
+            <div id="ambulance" class="ambulance">🚑</div>
+
+        </div>
+
+    </section>
+
+    <section class="result-panel" id="resultPanel">
+
+        <h2>🚨 Emergency Route Result</h2>
+
+        <div class="result-content">
+
+            <div>
+                <span>Fastest Route</span>
+                <strong id="routeText">Waiting for route...</strong>
+            </div>
+
+            <div>
+                <span>Total Road Cost</span>
+                <strong id="costText">--</strong>
+            </div>
+
+            <div>
+                <span>Status</span>
+                <strong id="statusText">Ready</strong>
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+<footer>
+    <p>Emergency Ambulance Route Planner | Dijkstra's Shortest Path Algorithm</p>
+</footer>
+
+<script src="script.js"></script>
+
+</body>
+</html>
